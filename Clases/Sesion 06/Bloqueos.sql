@@ -4,6 +4,11 @@ show tables;
 show variables like '%autocommit%';
 set autocommit = 0; -- Apagar Autocommit
 
+-- En otra sesion correr los coandos
+-- -- select * from information_schema.INNODB_TRX; -- Nos muestra las transacciones en progeso
+-- -- show processlist;
+-- -- show variables like '%lock%';
+
 -- Transacciones
 select * from depto;
 commit;
