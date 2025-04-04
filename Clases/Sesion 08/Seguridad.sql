@@ -11,7 +11,7 @@ create user 'ustest'@'123.7.90.122' identified by 'direccion123';
 create user 'ustest'@'123.7.90.*' identified by 'redes123';
 
 show databases;
-use credito2807;
+use credito;
 use patito23;
 
 show processlist;
@@ -121,5 +121,102 @@ USE credito2807;
 show privileges;
 
 grant all privileges on credito.* to 'ustest'@'localhost';
-show grants for 'ustest'@'localhost';
 flush privileges;
+show grants for 'ustest'@'localhost';
+
+revoke all privileges on credito.* from  'ustest'@'localhost';
+
+-- -- Asignar privilegios especificos a un usuario
+grant select on credito.* to 'ustest'@'localhost';
+flush privileges;
+show grants for 'ustest'@'localhost';
+
+grant insert, update, delete on credito.* to 'ustest'@'localhost';
+flush privileges;
+show grants for 'ustest'@'localhost';
+
+-- -- Revocar privilegios rspecificos
+revoke insert on credito.* from  'ustest'@'localhost';
+flush privileges;
+show grants for 'ustest'@'localhost';
+
+-- -- Dar privilegios especificos sobre una sola tabla
+grant insert on credito.depto to 'ustest'@'localhost';
+flush privileges;
+show grants for 'ustest'@'localhost';
+
+revoke select on credito.* from 'ustest'@'localhost';
+flush privileges;
+show grants for 'ustest'@'localhost';
+
+
+-- -- Privilegios sobre vistas
+
+create or replace view empleadas as
+select empno, epaterno, ematerno, enombre, fingreso
+from empleado
+where sexo = 'F';
+
+select * from empleadas;
+
+grant select on credito.empleadas to 'ustest'@'localhost';
+flush privileges;
+
+select deptono, count(*) from empleado group by deptono;
+select * from depto;
+
+
+create or replace view empleados_ventas as
+select * from empleado where deptono = 3;
+
+select * from empleados_ventas;
+
+grant select on credito.empleados_ventas to 'ustest'@'localhost';
+flush privileges;
+
+-- Privilegios por Roles
+drop user 'ustest'@'localhost';
+select * from mysql.user;
+
+create user 'ustest'@'localhost' identified by 'local123';
+show grants for 'ustest'@'localhost';
+
+create role 'developerapp', 'readapp', 'writeapp';
+flush privileges;
+
+show grants for 'developerapp';
+grant all privileges on *.* to 'developerapp';
+show privileges;
+
+grant select on credito.* to 'readapp';
+
+grant insert, update, delete on credito.* to 'writeapp';
+
+show grants for 'ustest'@'loacalhost';
+
+show variables like '%roles%';
+
+grant 'developerapp' to 'ustest'@'localhost';
+grant 'writeapp' to 'ustest'@'localhost';
+grant 'readapp' to 'ustest'@'localhost';
+
+
+show grants for 'ustest'@'localhost';
+show grants for 'ustest'@'localhost' using 'developerapp';
+
+revoke 'developerapp' from 'ustest'@'localhost';
+revoke 'writeapp' from 'ustest'@'localhost';
+revoke 'readapp' from 'ustest'@'localhost';
+
+-- -- Script para sacar todas las tablas de una base
+use credito;
+select * from information_schema.tables where TABLE_SCHEMA = database();
+
+create role 'selector';
+
+select concat('GRANT SELECT ON ', database(), '.', TABLE_NAME, ' TO \'selector\';')
+from information_schema.TABLES
+where TABLE_SCHEMA = database()
+and TABLE_NAME not like '%empleado%';
+
+grant 'selector' to 'ustest'@'localhost';
