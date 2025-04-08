@@ -37,7 +37,7 @@ join credito.tarjeta;
 
 
 -- 21-02-2025
-show variables like '%log_bin%'; -- Mostrar 
+show variables like '%log_bin%'; -- Mostrar Registros Binarios
 
 show binary logs;
 

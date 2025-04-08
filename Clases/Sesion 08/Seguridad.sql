@@ -30,7 +30,7 @@ flush privileges;
 grant all privileges on bdconcurrencia.* to 'ustest'@'localhost';
 flush privileges;
 
-revoke all privileges on bdconcurrencia.* from 'ustest'@'localhost';
+revoke all privileges on bdconcurrencia.* from 'ustest'@'localhost'; -- Error Falso
 flush privileges;
 
 show grants for 'ustest'@'localhost';
@@ -124,7 +124,7 @@ grant all privileges on credito.* to 'ustest'@'localhost';
 flush privileges;
 show grants for 'ustest'@'localhost';
 
-revoke all privileges on credito.* from  'ustest'@'localhost';
+revoke all privileges on credito.* from  'ustest'@'localhost'; -- Error Falso
 
 -- -- Asignar privilegios especificos a un usuario
 grant select on credito.* to 'ustest'@'localhost';

@@ -16,7 +16,7 @@ update depto set loc = "GDL" where deptono = 8;
 select * from depto;
 commit;
 
-select * from depto; -- Los cambios se guardaron de forma permanente.alter
+select * from depto; -- Los cambios se guardaron de forma permanente
 
 -- Hecr un rollback
 update depto set loc = "SNL" where deptono = 8;
