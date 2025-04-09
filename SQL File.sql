@@ -1,10 +1,11 @@
 -- Respaldos (10 - 86)
 -- Logs (102 - 131)
 -- Transacciones (133 - 157)
--- Concurrencia y Bloqueos (159 - 217)
--- Privilegios (219 - 306)
--- Accesos (308 - 337)
--- Roles (339 - 383)
+-- Concurrencia y Bloqueos (160 - 190)
+-- Aislamiento (192 - 219)
+-- Privilegios (220 - 307)
+-- Accesos (309 - 338)
+-- Roles (340 - 384)
 
 
 -- Respaldos
@@ -183,34 +184,36 @@ unlock tables;
 
 -- -- -- Ver Procesos
 show processlist;
-kill `[num. proceso]`
+kill `[num. proceso]`;
 
 -- -- -- Flush suelta todos los bloqueos
 flush tables with read lock;
 
--- -- Aislamiento
+-- Aislamiento
 show variables like '%isolation%'; -- READ UNCOMMITTED | READ COMMITTED | REPEATABLE READ | SERIALIZABLE
+set session TRANSACTION ISOLATION LEVEL `[Nivel de Aislamiento]`;
 
--- -- -- Busacr Variables a nivel Global o nivel Sesion
+-- -- Busacr Variables a nivel Global o nivel Sesion
 select @@GLOBAL.transaction_isolation;
 
 select @@SESSION.transaction_isolation;
 
--- -- -- Comando para Ajustar el Aislamiento de la Sesion
+-- -- Comando para Ajustar el Aislamiento de la Sesion
 SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; -- Permite leer desde el buffer los datos de las transacciones en proceso
 
--- -- -- Hacer Rollback a puntos anteriores
-select * from cuentas;
-
-rollback to punto_2;
+-- -- Puntos de Guardado
 
 select * from cuentas;
 
-rollback to punto_1;
+savepoint punto_1; -- Se genera un punto de guardado de la tabla
 
-select * from cuentas;
+-- Correr alguna operacion para alterar la tabla
+
+savepoint punto_2; -- Generar otro punto
 
 rollback to punto_2; -- Solo se puede regresar de un punto en un punto y de forma escalonada
+
+rollback to punto_1; -- Solo se puede regresar de un punto en un punto y de forma escalonada
 
 rollback;
 
@@ -249,7 +252,7 @@ select * from mysql.user; -- Ver que se haya aplicado la contraseña temporal
 alter user '[usuario]'@'[ubiacion]' account unlock;
 
 -- -- Generar usuario con bloqueo de intentos
-create user '[usuario]'@'[ubiacion]' identified by 'local123' 
+create user '[usuario]'@'[ubiacion]' identified by '[contraseña]' ;
 failed_login_attempts 3 password_lock_time 10; -- Error Falso
 
 select * from mysql.user where user = '[usuario]'; -- Ver que se haya aplicado el bloqueo por intentos
