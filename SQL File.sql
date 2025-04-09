@@ -1,10 +1,10 @@
 -- Respaldos (10 - 86)
 -- Logs (102 - 131)
 -- Transacciones (133 - 157)
--- Concurrencia y Bloqueos (159 - 213)
--- Privilegios (215 - 302)
--- Accesos (304 - 333)
--- Roles (335 - 379)
+-- Concurrencia y Bloqueos (159 - 217)
+-- Privilegios (219 - 306)
+-- Accesos (308 - 337)
+-- Roles (339 - 383)
 
 
 -- Respaldos
@@ -181,6 +181,10 @@ rollback;
 lock tables depto write;
 unlock tables;
 
+-- -- -- Ver Procesos
+show processlist;
+kill `[num. proceso]`
+
 -- -- -- Flush suelta todos los bloqueos
 flush tables with read lock;
 
@@ -210,7 +214,7 @@ rollback to punto_2; -- Solo se puede regresar de un punto en un punto y de form
 
 rollback;
 
-select * from cuentas;\
+select * from cuentas;
 
 -- Privilegios
 show privileges;
@@ -301,7 +305,7 @@ select * from `[vista]`;
 grant select on `[base]`.`[vista]` to '[usuario]'@'[ubiacion]';
 flush privileges;
 
--- -- Manejo de Recursos
+-- -- Accesos
 -- -- -- Crear usuario con limites
 create user '[usuario]'@'[ubiacion]' 
 identified by '[contraseña]'
