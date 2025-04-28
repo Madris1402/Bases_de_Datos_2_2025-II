@@ -126,3 +126,99 @@ set @Lista = '';
 call listaEmail(@Lista);
 
 select @Lista;
+
+-- 28/04/25
+
+-- Exportar JSONS usando While
+
+delimiter $$ 
+drop procedure if exists listaEmail $$
+create procedure listaEmail(IN pdepto varchar(50), INOUT plista JSON)
+begin
+	declare  vclave int;
+    declare vnombre varchar(250);
+     declare vemail varchar(250);
+     declare terminado int default 0;
+     declare totalRegistros int default 0;
+     declare msg varchar(250);
+     
+     declare email_cursor cursor for
+		select e.empno, concat_ws('', enombre, epaterno, ematerno) empleado, email
+        from empleado e join info_empleado i on(e.empno = i.empno)
+        join depto d on(e.deptono = d.deptono)
+        where dnombre = pdepto and email like '%@%';
+	declare continue handler for not found set terminado = 1;
+    
+    select count(*) into totalRegistros
+		from empleado e join info_empleado i on(e.empno = i.empno)
+        join depto d on(e.deptono = d.deptono)
+        where dnombre = pdepto and email like '%@%';
+    
+    if(totalRegistros > 0) then
+		open email_cursor;
+        fetch email_cursor into vclave, vnombre, vemail;
+		
+        set plista = JSON_OBJECT('totalRegistros', totalRegistros, 'emails', JSON_ARRAY());
+        while terminado = 0 do
+			set plista = JSON_SET(
+				plista,
+                '$.totalRegistros', totalRegistros,
+                '$.emails', JSON_ARRAY_APPEND(
+					JSON_EXTRACT(plista, '$.emails'),
+                    '$', JSON_OBJECT('nombre', vnombre, 'email', vemail)
+                )
+            );
+            fetch email_cursor into vclave, vnombre, vemail;
+        end while;
+		close email_cursor;
+    else
+		set msg = concat('No existen registros para: ', pdepto);
+        signal sqlstate '40500' set message_text = msg;
+    end if;
+    
+end $$
+delimiter ;
+
+set @Lista = null;
+call listaEmail('cajas', @Lista);
+call listaEmail('sistemas', @Lista);
+call listaEmail('patito23', @Lista);
+
+select @Lista;
+
+
+-- Crear Vista de Clientes
+create or replace view cliente as
+select empno + 3000 nocliente, epaterno cpaterno, ematerno cmaterno, enombre cnombre, sexo, sueldo consumo
+from empleado;
+
+select * from cliente;
+
+-- Procedimiento para Consultas Dinamicas
+delimiter $$ 
+drop procedure if exists consultaDinamica $$
+create procedure consultaDinamica(IN tabla varchar(50), IN sexo varchar(1), in orden int)
+begin
+	set @query = concat(
+		'SELECT * FROM ('
+        'SELECT CONCAT_WS(\' \', ',
+        if(tabla = 'empleado', 'enombre, epaterno, ematerno', 
+			'cnombre, cpaterno, cmaterno'),
+            ') as ', tabla, ', ',
+		if(tabla = 'empleado', 'fingreso, sexo, sueldo', 'sexo, consumo'),
+        ' FROM ', tabla,
+        if(sexo in('F', 'M'), CONCAT(' Where sexo = \'', sexo, '\''), ''),
+        ') as s ORDER BY 1 ', if(orden = 0, 'ASC', 'DESC') 
+    );
+    -- select @query;
+    prepare stmt from @query;
+    execute stmt;
+    deallocate prepare stmt;
+end $$
+delimiter ;
+
+call consultaDinamica('empleado', 'M', '0');
+
+call consultaDinamica('cliente', 'F', '1');
+
+call consultaDinamica('cliente', 'X', '1');
