@@ -15,7 +15,7 @@ delimiter $$
 
 drop trigger if exists bi_depto;
 create trigger bi_depto
-before insert onn depto
+before insert on depto
 for each row
 begin
 	set NEW.dnombre = UPPER(NEW.dnombre);
@@ -34,6 +34,7 @@ insert into depto values(210, 'base de datos', 'edomex');
 -- 05 - 05 - 2025
 -- Trigger para condicionar incersiones
 delimiter $$
+
 drop trigger if exists bi_empleado;
 create trigger bi_empleado
 before insert on empleado
@@ -47,6 +48,7 @@ begin
 		signal sqlstate'45000'
 		set message_text = 'Sueldo no puede ser menos que el minimo';
 	end if;
+    
 
 end $$
 delimiter ;
